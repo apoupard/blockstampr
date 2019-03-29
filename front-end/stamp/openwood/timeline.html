@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en" class="no-js">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>First Timeline </title>
+    <!--Font Awesome-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"/>
+    <link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet">
+    <link rel="stylesheet" href="../css/demo/reset.css">
+    <link rel="stylesheet" href="../css/plugins/animate.min.css">
+    <!-- CSS Animation -->
+    <link rel="stylesheet" href="../css/default.min.css">
+    <!-- Resource style -->
+    <link rel="stylesheet" href="../css/demo/demo.css">
+    <link rel="stylesheet" href="../css/frst-timeline-style-9.css">
+    <!-- Resource style -->
+    <script src="js/modernizr.js"></script>
+
+    <script src="../js/jquery-3.1.1.min.js"></script>
+    <script src="../js/jquery.loadTemplate.min.js"></script>
+
+
+
+
+</head>
+
+<body>
+<div id="page">
+    <header class="site-header">
+        <div class="header-top">
+            <div class="container">
+                <div class="frst-logo"><strong>BlockStampr</strong> True traceability</div>
+            </div>
+        </div>
+    </header>
+    <div class="frst-container" data-animation-name="slideInUp">
+        <div class="frst-timeline frst-timeline-style-9 frst-alternate" id="template-container">
+
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="template">
+    <div data-class="side" class="frst-timeline-block" data-animation="slideInUp">
+        <div class="frst-timeline-img">
+            <span data-content="state"></span>
+            <span class="step-text" data-content="actor"></span>
+        </div>
+        <div class="frst-timeline-content" style="position: relative;">
+            <span class="connector"></span>
+            <div class="frst-timeline-content-inner">
+                <h2 data-content="title"></h2>
+                <p data-content="description"></p>
+            </div>
+        </div>
+    </div>
+</script>
+<script>
+    $(function () {
+        $.urlParam = function (name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.href);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, '    '));
+        };
+
+        $.get('http://ca.pr-bc1.chain-ops.net:8001', {cmd: "query", fcn: "ssm", 'args': 'iterop-sign-document'})
+            .done(function (data) {
+                var ssm=data;
+                $.get('http://ca.pr-bc1.chain-ops.net:8001', {cmd: "query", fcn: "log", 'args': $.urlParam('session')})
+                    .done(function (data) {
+                        console.log(data)
+                        $.each(data, function( index, value ) {
+                            $("#template-container").loadTemplate(
+                                $("#template"),
+                                {
+                                    side : index % 2 ? 'frst-even-item' : 'frst-odd-item',
+                                    state: value.state.iteration,
+                                    actor: 'bob',
+                                    title: 'Role '+value.state.roles['iterop-sign-doc'] + ' '+ 'Action '+ssm.transitions[value.state.current].action,
+                                    description: JSON.stringify(value.state)
+                                },
+                                {
+                                    append: true
+                                }
+                            );
+                        })
+                    });
+            });
+
+
+    });
+</script>
+
+</body>
